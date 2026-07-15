@@ -1,7 +1,7 @@
 # Stationery-Store
 
 ### Business Request 
-The Sales Manager requested a move from static reports to interactive for better track of sales performance focusing on products sold, payment method, Geographic breakdown, Customers retention, and month over month (MOM) growth rate.
+The Sales Manager requested a move from static reports to interactive for better track of sales performance focusing on products sold, payment method, Geographic breakdown, and month over month (MOM) growth rate.
 
 ### Tool used
 SQL Server Express
