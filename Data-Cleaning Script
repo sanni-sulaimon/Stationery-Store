@@ -2,8 +2,130 @@
 ---Check for null and duplicate 
 ---Result= Multiple duplicate
 
-```Select Order_ID, Count(*) as total_count
+Select Order_ID, Count(*) as total_count
 From [dbo].[Sales Datasql]
 Group by Order_ID
 Having Count(*) > 1 or Order_ID IS NULL;
-```
+
+
+*---Total numbers of duplicate 
+---Expectation= no result
+---result= 647
+WITH DuplicateCount AS (
+    SELECT 
+        Order_ID, 
+        COUNT(*) - 1 AS Total_Duplicate
+    FROM [dbo].[Sales Datasql]
+    WHERE Order_ID IS NOT NULL
+    GROUP BY Order_ID
+    HAVING COUNT(*) > 1
+)
+SELECT SUM(Total_Duplicate) AS total_duplicate_rows
+FROM DuplicateCount;
+
+
+---To Flag Duplicate Rows 
+---Result= 392 rows affected 
+Select * From (
+    Select *,
+           ROW_NUMBER() OVER(PARTITION BY Order_id Order by Order_Date) as Flag_duplicate
+    From [dbo].[Sales Datasql]
+) As t
+where t.Flag_duplicate > 1;
+
+
+---Delete Duplicate From Table
+---Result= 392 rows removed
+WITH CTE_RemoveDuplicates AS (
+    SELECT 
+        Order_ID,
+        Amount,
+        Profit,
+        Quantity,
+        Category,
+        Sub_Category,
+        PaymentMode,
+        Order_Date,
+        CustomerName,
+        State,
+        City,
+        ROW_NUMBER() OVER (
+            PARTITION BY CustomerName
+            ORDER BY [Order_ID] ASC
+        ) AS RowNum
+    FROM [SalesSQL].[dbo].[Sales Datasql]
+)
+DELETE FROM CTE_RemoveDuplicates
+WHERE RowNum > 1;
+
+---Data Quality Check For Amount
+---Check For Nulls or Negative Number
+---Expectation= No result
+Select Amount
+From [SalesSQL].[dbo].[Sales Datasql]
+where Amount < 0 or Amount is NUll;
+
+---Data Quality Check For Profit
+---Check For Nulls or Negative Number
+---Expectation= No result
+Select Profit
+From [SalesSQL].[dbo].[Sales Datasql]
+where Amount < 0 or Amount is NUll;
+
+---Data Quality Check For Quantity
+---Check For Nulls or Negative Number
+---Expectation= No result
+Select Distinct Quantity
+From [SalesSQL].[dbo].[Sales Datasql]
+where Quantity < 0 or Quantity is NUll;
+
+---Data Quality Check For Category
+---Check For Unwanted Space
+---Expectation= No result
+Select Category
+From [SalesSQL].[dbo].[Sales Datasql]
+where Category != TRIM (Category);
+
+---Data Quality Check For Sub_Category
+---Check For Unwanted Space
+---Expectation= No result
+Select Sub_Category
+From [SalesSQL].[dbo].[Sales Datasql]
+where Sub_Category != TRIM (Sub_Category);
+
+---Data Quality Check For PaymentMode
+---Check Fo Standardization and Consistency
+---Expectation= No result
+Select Distinct PaymentMode 
+From [SalesSQL].[dbo].[Sales Datasql]
+
+---Data Quality Check For Order_date
+---Check For Invalid Order_date
+---Result= 646 rows affected
+Select Distinct Order_Date 
+From [SalesSQL].[dbo].[Sales Datasql]
+
+---Data Quality Check For CustomerName
+---Check For Unwanted Space
+---Expectation= No result
+Select CustomerName 
+From [SalesSQL].[dbo].[Sales Datasql]
+Where CustomerName != TRIM (CustomerName);
+
+---Data Quality Check For State
+---Check For Standardization and Consistency
+---Expectation= No result
+Select Distinct State
+From [SalesSQL].[dbo].[Sales Datasql]
+
+---Data Quality Check For City
+---Check For Standardization and Consistency
+---Expectation= No result
+Select Distinct City
+From [SalesSQL].[dbo].[Sales Datasql]
+
+---Data Quality Check For Year and Month
+---Check For Standardization and Consistency
+---Expectation= No result
+Select Year_Month
+From [SalesSQL].[dbo].[Sales Datasql]
