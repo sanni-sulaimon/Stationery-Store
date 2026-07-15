@@ -1,0 +1,9 @@
+---Data Quality Check For Order Id
+---Check for null and duplicate 
+---Result= Multiple duplicate
+
+```Select Order_ID, Count(*) as total_count
+From [dbo].[Sales Datasql]
+Group by Order_ID
+Having Count(*) > 1 or Order_ID IS NULL;
+```
